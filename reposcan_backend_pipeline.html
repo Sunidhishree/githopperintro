@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RepoScan AI — Backend Pipeline</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f5f4f0;
+    padding: 32px 16px;
+    color: #1a1a1a;
+  }
+  h1 {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #111;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 36px;
+  }
+  .pipeline {
+    max-width: 680px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .stage {
+    width: 100%;
+    border-radius: 10px;
+    padding: 14px 20px;
+    position: relative;
+  }
+  .stage-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    opacity: 0.7;
+  }
+  .stage-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .stage-desc {
+    font-size: 13px;
+    opacity: 0.8;
+    line-height: 1.5;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-right: 6px;
+    margin-top: 6px;
+  }
+
+  /* Colors */
+  .purple { background: #EEEDFE; border: 1px solid #AFA9EC; }
+  .purple .stage-label { color: #534AB7; }
+  .purple .stage-title { color: #26215C; }
+  .purple .stage-desc { color: #3C3489; }
+  .purple .badge { background: #534AB7; color: #fff; }
+
+  .teal { background: #E1F5EE; border: 1px solid #5DCAA5; }
+  .teal .stage-label { color: #0F6E56; }
+  .teal .stage-title { color: #04342C; }
+  .teal .stage-desc { color: #085041; }
+  .teal .badge { background: #0F6E56; color: #fff; }
+
+  .blue { background: #E6F1FB; border: 1px solid #85B7EB; }
+  .blue .stage-label { color: #185FA5; }
+  .blue .stage-title { color: #042C53; }
+  .blue .stage-desc { color: #0C447C; }
+  .blue .badge { background: #185FA5; color: #fff; }
+
+  .coral { background: #FAECE7; border: 1px solid #F0997B; }
+  .coral .stage-label { color: #993C1D; }
+  .coral .stage-title { color: #4A1B0C; }
+  .coral .stage-desc { color: #712B13; }
+  .coral .badge { background: #993C1D; color: #fff; }
+
+  .amber { background: #FAEEDA; border: 1px solid #EF9F27; }
+  .amber .stage-label { color: #854F0B; }
+  .amber .stage-title { color: #412402; }
+  .amber .stage-desc { color: #633806; }
+  .amber .badge { background: #854F0B; color: #fff; }
+
+  .gray { background: #F1EFE8; border: 1px solid #B4B2A9; }
+  .gray .stage-label { color: #5F5E5A; }
+  .gray .stage-title { color: #2C2C2A; }
+  .gray .stage-desc { color: #444441; }
+  .gray .badge { background: #5F5E5A; color: #fff; }
+
+  /* Arrow */
+  .arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 4px 0;
+  }
+  .arrow-line {
+    width: 2px;
+    height: 22px;
+    background: #aaa;
+  }
+  .arrow-label {
+    font-size: 11px;
+    color: #888;
+    margin: 2px 0;
+  }
+  .arrow-head {
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid #aaa;
+  }
+
+  /* Split row */
+  .split-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    width: 100%;
+  }
+  .split-arrows {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    width: 100%;
+  }
+
+  /* Side services */
+  .side-services {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: -8px;
+    margin-bottom: 8px;
+  }
+  .side-chip {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #F1EFE8;
+    border: 1px solid #B4B2A9;
+    color: #444441;
+  }
+
+  /* Step numbers */
+  .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+    flex-shrink: 0;
+    vertical-align: middle;
+    background: rgba(0,0,0,0.12);
+    color: inherit;
+  }
+
+  .stage-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  /* Legend */
+  .legend {
+    max-width: 680px;
+    margin: 24px auto 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+  .legend h3 {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #888;
+    margin-bottom: 12px;
+  }
+  .legend-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #444;
+  }
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>RepoScan AI — Backend Pipeline</h1>
+<p class="subtitle">Full end-to-end flow: from GitHub URL → Bedrock AI scans → Repo Health Card</p>
+
+<div class="pipeline">
+
+  <!-- Stage 1 -->
+  <div class="stage purple">
+    <div class="stage-label">Stage 1 · Frontend</div>
+    <div class="stage-title"><span class="step-num">1</span>React Frontend (S3 / Amplify)</div>
+    <div class="stage-desc">
+      User pastes a public GitHub repo URL and clicks <strong>Scan</strong>.<br>
+      Frontend sends <code>POST /scan</code> with <code>{ repoUrl: "..." }</code> to API Gateway.
+    </div>
+    <span class="badge">React.js</span>
+    <span class="badge">Tailwind CSS</span>
+    <span class="badge">AWS Amplify</span>
+  </div>
+
+  <div class="arrow">
+    <div class="arrow-label">HTTPS POST /scan</div>
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- Stage 2 -->
+  <div class="stage teal">
+    <div class="stage-label">Stage 2 · API Layer</div>
+    <div class="stage-title"><span class="step-num">2</span>Amazon API Gateway</div>
+    <div class="stage-desc">
+      Receives the POST request. Validates payload, enforces rate limits, handles CORS for the React origin.
+      Triggers Lambda #1 synchronously.
+    </div>
+    <span class="badge">REST API</span>
+    <span class="badge">CORS</span>
+    <span class="badge">Rate limiting</span>
+  </div>
+
+  <div class="arrow">
+    <div class="arrow-label">Invokes Lambda</div>
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- Stage 3 -->
+  <div class="stage blue">
+    <div class="stage-label">Stage 3 · Lambda #1</div>
+    <div class="stage-title"><span class="step-num">3</span>github-fetcher Lambda (Node.js)</div>
+    <div class="stage-desc">
+      Calls <strong>GitHub REST API</strong> with the repo URL.<br>
+      Fetches: full file tree, raw source file contents, <code>package.json</code> / <code>requirements.txt</code>,
+      IaC files (Terraform, CloudFormation). Returns a structured file map to the next Lambda.
+    </div>
+    <span class="badge">GitHub REST API</span>
+    <span class="badge">AWS Lambda</span>
+  </div>
+
+  <div class="arrow">
+    <div class="arrow-label">Raw file map</div>
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- Stage 4 -->
+  <div class="stage blue">
+    <div class="stage-label">Stage 4 · Lambda #2</div>
+    <div class="stage-title"><span class="step-num">4</span>code-processor Lambda (Python)</div>
+    <div class="stage-desc">
+      Prepares code for AI analysis:<br>
+      • <strong>Chunking</strong> — splits large files to fit Bedrock's context window<br>
+      • <strong>Dep parsing</strong> — extracts library versions from manifests<br>
+      • <strong>IaC detection</strong> — identifies S3, IAM, security group configs<br>
+      Outputs two payloads: one for security scan, one for debt scan.
+    </div>
+    <span class="badge">AWS Lambda</span>
+    <span class="badge">Context chunking</span>
+    <span class="badge">Dep parsing</span>
+  </div>
+
+  <div class="arrow">
+    <div class="arrow-label">Two structured payloads</div>
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- Stage 5: dual Bedrock -->
+  <div class="split-row">
+    <div class="stage coral">
+      <div class="stage-label">Stage 5a · AI Scan</div>
+      <div class="stage-title"><span class="step-num">5</span>Bedrock — Security Scan</div>
+      <div class="stage-desc">
+        Claude 3 Sonnet via <code>InvokeModel</code>.<br>
+        Detects: hardcoded secrets &amp; API keys, insecure/outdated dependencies, IaC misconfigs (S3 public, IAM *, open SGs), injection vulns, exposed endpoints.<br>
+        Returns structured JSON findings.
+      </div>
+      <span class="badge">Claude 3 Sonnet</span>
+      <span class="badge">JSON mode</span>
+    </div>
+    <div class="stage amber">
+      <div class="stage-label">Stage 5b · AI Scan</div>
+      <div class="stage-title"><span class="step-num">5</span>Bedrock — Debt Scan</div>
+      <div class="stage-desc">
+        Claude 3 Sonnet via <code>InvokeModel</code>.<br>
+        Detects: high cyclomatic complexity functions, duplicate/copy-paste logic, missing test coverage, tightly coupled modules, abandoned feature flags.<br>
+        Returns structured JSON findings.
+      </div>
+      <span class="badge">Claude 3 Sonnet</span>
+      <span class="badge">JSON mode</span>
+    </div>
+  </div>
+
+  <div class="arrow">
+    <div class="arrow-label">Merged findings JSON</div>
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- Stage 6 -->
+  <div class="stage blue">
+    <div class="stage-label">Stage 6 · Lambda #3</div>
+    <div class="stage-title"><span class="step-num">6</span>scorer Lambda (Python)</div>
+    <div class="stage-desc">
+      Aggregates all findings from both Bedrock calls.<br>
+      Runs <strong>severity × effort</strong> scoring on each finding.<br>
+      Computes: <strong>Security Health score</strong>, <strong>Debt Health score</strong>, <strong>Overall Repo Health Score</strong> (0–100).<br>
+      Builds prioritised action plan — quick wins and critical blockers surfaced first.
+    </div>
+    <span class="badge">Scoring logic</span>
+    <span class="badge">AWS Lambda</span>
+  </div>
+
+  <div class="arrow">
+    <div class="arrow-label">Scored findings</div>
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- Stage 7 -->
+  <div class="stage coral">
+    <div class="stage-label">Stage 7 · AI Report</div>
+    <div class="stage-title"><span class="step-num">7</span>Bedrock — Report Formatter</div>
+    <div class="stage-desc">
+      Final Claude 3 Sonnet call.<br>
+      Takes scored findings JSON and generates the full <strong>Repo Health Card</strong>:
+      plain-English explanations, fix suggestions with code snippets, estimated fix times.
+      Output is a clean JSON blob ready for the React frontend.
+    </div>
+    <span class="badge">Claude 3 Sonnet</span>
+    <span class="badge">Plain-English output</span>
+  </div>
+
+  <div class="arrow">
+    <div class="arrow-label">Health Card JSON</div>
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- Stage 8: split delivery -->
+  <div class="split-row">
+    <div class="stage teal">
+      <div class="stage-label">Stage 8a · Storage</div>
+      <div class="stage-title"><span class="step-num">8</span>Amazon S3</div>
+      <div class="stage-desc">
+        Report JSON saved as an artifact in S3. Generates a shareable URL so teams can revisit past scans and track score improvement over time.
+      </div>
+      <span class="badge">S3 artifact</span>
+      <span class="badge">Shareable link</span>
+    </div>
+    <div class="stage purple">
+      <div class="stage-label">Stage 8b · Display</div>
+      <div class="stage-title"><span class="step-num">8</span>React UI — Health Card</div>
+      <div class="stage-desc">
+        Response rendered in the React frontend: score gauge, security findings, debt findings, prioritised action plan, and quick wins section.
+      </div>
+      <span class="badge">Health Card</span>
+      <span class="badge">Export option</span>
+    </div>
+  </div>
+
+  <!-- Side services -->
+  <div style="width:100%;margin-top:16px;padding:14px 20px;background:#F1EFE8;border:1px solid #B4B2A9;border-radius:10px;">
+    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#5F5E5A;margin-bottom:10px;">Cross-cutting AWS services (active throughout)</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;">
+      <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:10px 14px;flex:1;min-width:140px;">
+        <div style="font-weight:600;font-size:13px;color:#2C2C2A;">CloudWatch</div>
+        <div style="font-size:12px;color:#666;margin-top:2px;">Logs all Lambda invocations. Real-time error + latency metrics during demo.</div>
+      </div>
+      <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:10px 14px;flex:1;min-width:140px;">
+        <div style="font-weight:600;font-size:13px;color:#2C2C2A;">IAM Roles</div>
+        <div style="font-size:12px;color:#666;margin-top:2px;">Fine-grained per-Lambda roles. Only the AI Lambda has <code>bedrock:InvokeModel</code>. S3 write scoped to output bucket only.</div>
+      </div>
+      <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:10px 14px;flex:1;min-width:140px;">
+        <div style="font-weight:600;font-size:13px;color:#2C2C2A;">AWS Amplify</div>
+        <div style="font-size:12px;color:#666;margin-top:2px;">CI/CD for React app. Provides HTTPS endpoint. Connects to S3 for static assets.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <h3>Color legend</h3>
+  <div class="legend-grid">
+    <div class="legend-item"><div class="legend-dot" style="background:#534AB7;"></div>React frontend</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#185FA5;"></div>AWS Lambda (compute)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#993C1D;"></div>Amazon Bedrock (AI)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#0F6E56;"></div>AWS infra / storage</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#854F0B;"></div>Technical debt scan</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#5F5E5A;"></div>Cross-cutting services</div>
+  </div>
+</div>
+
+</body>
+</html>
