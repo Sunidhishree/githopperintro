@@ -1,0 +1,26 @@
+.interactive-link {
+    position: relative;
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.link-text {
+    position: relative;
+    z-index: 2;
+}
+
+.link-underline {
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    origin: left;
+    z-index: 1;
+}

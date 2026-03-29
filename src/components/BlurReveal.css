@@ -1,0 +1,3 @@
+.blur-reveal {
+    will-change: filter, opacity;
+}

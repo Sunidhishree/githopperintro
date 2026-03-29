@@ -1,0 +1,49 @@
+.scroll-stack-scroller {
+    width: 100%;
+    position: relative;
+}
+
+.scroll-stack-inner {
+    padding-top: 0.35rem;
+}
+
+.scroll-stack-card {
+    border: 1px solid rgba(130, 168, 92, 0.4);
+    background: linear-gradient(165deg, rgba(17, 23, 14, 0.88), rgba(7, 10, 6, 0.9));
+    color: #d7e6c9;
+    border-radius: 14px;
+    padding: 1.2rem 1.1rem;
+    min-height: 112px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+}
+
+.scroll-stack-card h3 {
+    margin: 0 0 0.55rem;
+    font-family: "Bebas Neue", "Oswald", sans-serif;
+    letter-spacing: 0.05em;
+    font-size: clamp(1.15rem, 2.2vw, 1.42rem);
+    color: #93e25a;
+    line-height: 1.35;
+}
+
+.scroll-stack-card p {
+    margin: 0;
+    font-size: clamp(0.98rem, 1.7vw, 1.1rem);
+    line-height: 1.65;
+    color: #d0ddc3;
+}
+
+.scroll-stack-end {
+    height: 8vh;
+}
+
+@media (max-width: 640px) {
+    .scroll-stack-card {
+        min-height: 126px;
+        padding: 1.1rem 1rem;
+    }
+
+    .scroll-stack-end {
+        height: 6vh;
+    }
+}

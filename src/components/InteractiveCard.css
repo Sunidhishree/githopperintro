@@ -1,0 +1,54 @@
+.interactive-card {
+    position: relative;
+    padding: 1.5rem;
+    border: 1px solid rgba(60, 255, 20, 0.2);
+    border-radius: 8px;
+    background: rgba(10, 10, 10, 0.6);
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.card-border {
+    position: absolute;
+    inset: 0;
+    border: 1px solid;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+.card-content {
+    position: relative;
+    z-index: 2;
+}
+
+.card-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.8;
+}
+
+.card-title {
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #d4d4d4;
+}
+
+.card-description {
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+    color: #999;
+    line-height: 1.5;
+}
+
+.card-accent {
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+}
